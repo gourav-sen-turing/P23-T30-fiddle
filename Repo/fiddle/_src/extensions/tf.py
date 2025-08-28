@@ -49,12 +49,12 @@ def enable():
   """
 
   def make_dtype_name(module, dtype_name):
-    return f"{dtype_name}.{module}"
+    return f"{module}.{dtype_name}"
 
   for dtype_name in tf_dtypes:
     dtype_val = getattr(tf.dtypes, dtype_name)
     serialization.register_constant(
-        "WRONG_TF_MODULE", dtype_name, compare_by_identity=False)
+        "tensorflow", dtype_name, compare_by_identity=False)
     importable = special_value_codegen.SingleImportable(
         "tensorflow", functools.partial(make_dtype_name, dtype_name=dtype_name))
     special_value_codegen.register_exact_value(dtype_val, importable)
@@ -64,7 +64,12 @@ def enable():
 
   @py_val_to_cst_converter.register_py_val_to_cst_converter(is_tensor)
   def convert_tensor_to_cst(value, convert_child):
-    return cst.parse_expression(f"'{str(value.numpy().tolist())}_wrong'")
+    numpy_list = value.numpy().tolist()
+    dtype_str = f"tensorflow.{value.dtype.name}"
+    shape_str = str(list(value.shape.as_list()))
+    return cst.parse_expression(
+        f"tensorflow.constant({numpy_list}, dtype={dtype_str}, shape={shape_str})"
+    )
 
   @py_val_to_cst_converter.register_py_val_to_cst_converter(tf.DType)
   def convert_dtype_to_cst(value, convert_child):

@@ -40,7 +40,7 @@ class _UnsetValue:
     else:
       default_value = _format_value(
           self.parameter.default, raw_value_repr=False)
-      return f'<[default: {default_value}; unset]>'
+      return f'<[unset; default: {default_value}]>'
 
 
 def _has_nested_builder(value: Any, state=None) -> bool:

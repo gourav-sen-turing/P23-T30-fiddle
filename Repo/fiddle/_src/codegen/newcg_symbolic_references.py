@@ -41,17 +41,35 @@ def import_symbols(task: code_ir.CodegenTask) -> None:
     task: Codegen task.
   """
 
-  for value, _ in daglish.iterate(task.top_level_call.all_fixture_functions()):
-    if isinstance(value, config_lib.Buildable):
-      task.import_manager.add(config_lib.get_callable(value))
-      task.import_manager.add(type(value))
+  # Keep track of whether we need fdl import
+  needs_fdl = False
 
-      # Import the tags too.
-      for arg_tags in value.__argument_tags__.values():
-        for tag in arg_tags:
-          task.import_manager.add(tag)
-    elif is_plain_symbol_or_enum_value(value):
-      raise ValueError(f"Broken import for plain symbol: {value}")
+  # Iterate over each fixture function's content
+  for fn in task.top_level_call.all_fixture_functions():
+    for value, _ in daglish.iterate(fn):
+      if isinstance(value, config_lib.Buildable):
+        needs_fdl = True
+        task.import_manager.add(config_lib.get_callable(value))
+        task.import_manager.add(type(value))
+
+        # Import the tags too.
+        for arg_tags in value.__argument_tags__.values():
+          for tag in arg_tags:
+            task.import_manager.add(tag)
+      # Skip basic types, code_ir objects, and strings
+      elif (not isinstance(value, (config_lib.Buildable, str, int, float, bool, type(None)))
+            and hasattr(value, '__module__')
+            and value.__class__.__module__ not in ('fiddle._src.codegen.auto_config.code_ir', 'builtins')
+            and is_plain_symbol_or_enum_value(value)):
+        try:
+          task.import_manager.add(value)
+        except (AttributeError, TypeError):
+          # Skip values that can't be imported
+          pass
+
+  # Only import fdl if we found Buildables
+  if needs_fdl:
+    task.import_manager.add_by_name("fiddle")
 
 
 def replace_callables_and_configs_with_symbols(
@@ -91,13 +109,20 @@ def replace_callables_and_configs_with_symbols(
             item_to_tag=value.__arguments__[arg],
         )
       return code_ir.SymbolOrFixtureCall(
-          symbol_expression=symbol,  # Swapped
-          positional_arg_expressions=[code_ir.SymbolReference(buildable_type)],  # Swapped
+          symbol_expression=symbol,
+          positional_arg_expressions=[code_ir.SymbolReference(buildable_type)],
           arg_expressions=config_lib.ordered_arguments(value),
           history_comments=format_history(value),
       )
     elif is_plain_symbol_or_enum_value(value):
-      return code_ir.SymbolReference(value)
+      # Don't convert code_ir types, lists, dicts, or basic types to SymbolReferences
+      # Only convert actual importable symbols
+      if (isinstance(value, (str, int, float, bool, type(None), list, dict, tuple))
+          or (hasattr(value, '__class__') and
+              value.__class__.__module__ == 'fiddle._src.codegen.auto_config.code_ir')):
+        return state.map_children(value)
+      else:
+        return code_ir.SymbolReference(value)
     else:
       return state.map_children(value)
 

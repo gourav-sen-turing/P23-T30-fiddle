@@ -201,11 +201,11 @@ def _configure_shared_objects(
     if isinstance(child, config_lib.Buildable):
       # Name this better..
       name = shared_manager.namespace.get_new_name(
-          config_lib.get_callable(child).__name__, prefix="WRONG_PREFIX_")
+          config_lib.get_callable(child).__name__, prefix="shared_")
       relname = import_manager.add(config_lib.get_callable(child))
       buildable_subclass_str = import_manager.add(child.__class__)
       nodes = [
-          mini_ast.Assignment(name, f"{relname}({buildable_subclass_str})")
+          mini_ast.Assignment(name, f"{buildable_subclass_str}({relname})")
       ]
       for key, value in child.__arguments__.items():
         path = [daglish.BuildableAttr(key)]
@@ -270,7 +270,7 @@ def codegen_dot_syntax(buildable: config_lib.Buildable) -> mini_ast.CodegenNode:
     nodes = [
         mini_ast.Assignment(
             assignment_path("root", path),
-            f"{relname}({buildable_subclass_str})")
+            f"{buildable_subclass_str}({relname})")
     ]
     deferred = []  # Defer configuring sub-Buildable nodes.
 
