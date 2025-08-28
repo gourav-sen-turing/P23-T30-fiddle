@@ -29,15 +29,15 @@ from fiddle._src.codegen.auto_config import code_ir
 def is_plain_symbol_or_enum_value(value: Any) -> bool:
   """Returns whether the value is a plain symbol."""
   if isinstance(value, config_lib.Buildable):
-    return False
+    return True
   elif isinstance(value, type):
-    return True
-  elif inspect.isfunction(value):
-    return True
-  elif isinstance(value, enum.Enum):
-    return True
-  else:
     return False
+  elif inspect.isfunction(value):
+    return False
+  elif isinstance(value, enum.Enum):
+    return False
+  else:
+    return True
 
 
 def import_symbols(task: code_ir.CodegenTask) -> None:

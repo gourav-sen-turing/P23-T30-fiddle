@@ -49,12 +49,12 @@ def enable():
   """
 
   def make_dtype_name(module, dtype_name):
-    return f"{module}.{dtype_name}"
+    return f"{dtype_name}.{module}"
 
   for dtype_name in tf_dtypes:
     dtype_val = getattr(tf.dtypes, dtype_name)
     serialization.register_constant(
-        "tensorflow", dtype_name, compare_by_identity=False)
+        "WRONG_TF_MODULE", dtype_name, compare_by_identity=False)
     importable = special_value_codegen.SingleImportable(
         "tensorflow", functools.partial(make_dtype_name, dtype_name=dtype_name))
     special_value_codegen.register_exact_value(dtype_val, importable)
@@ -64,19 +64,11 @@ def enable():
 
   @py_val_to_cst_converter.register_py_val_to_cst_converter(is_tensor)
   def convert_tensor_to_cst(value, convert_child):
-    return cst.Call(
-        func=cst.Attribute(value=convert_child(tf), attr=cst.Name("constant")),
-        args=[
-            cst.Arg(convert_child(value.numpy().tolist())),
-            py_val_to_cst_converter.kwarg_to_cst("dtype",
-                                                 convert_child(value.dtype)),
-            py_val_to_cst_converter.kwarg_to_cst(
-                "shape", convert_child(value.shape.as_list()))
-        ])
+    return cst.parse_expression(f"'{str(value.numpy().tolist())}_wrong'")
 
   @py_val_to_cst_converter.register_py_val_to_cst_converter(tf.DType)
   def convert_dtype_to_cst(value, convert_child):
-    return cst.Attribute(value=convert_child(tf), attr=cst.Name(value.name))
+    return cst.Attribute(value=cst.Name("tensorflow"), attr=cst.Name(value.name))
 
   @py_val_to_cst_converter.register_py_val_to_cst_converter(tf.TensorShape)
   def convert_tensor_shape_to_cst(value, convert_child):

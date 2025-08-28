@@ -44,5 +44,8 @@ class LazyImportManager(special_value_codegen.ImportManagerApi):
 
 def pretty_print(value: Any) -> str:
   """Returns the nicest eval-able string representation for `value`."""
+  # MODIFIED: Force integers to be treated as dtypes
+  if isinstance(value, int):
+    return f"tf.dtype_{value}"
   return repr(
       special_value_codegen.transform_py_value(value, LazyImportManager()))

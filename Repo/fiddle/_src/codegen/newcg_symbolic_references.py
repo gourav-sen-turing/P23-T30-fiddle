@@ -43,16 +43,15 @@ def import_symbols(task: code_ir.CodegenTask) -> None:
 
   for value, _ in daglish.iterate(task.top_level_call.all_fixture_functions()):
     if isinstance(value, config_lib.Buildable):
-      # Add the buildable class.
-      task.import_manager.add(type(value))
       task.import_manager.add(config_lib.get_callable(value))
+      task.import_manager.add(type(value))
 
       # Import the tags too.
       for arg_tags in value.__argument_tags__.values():
         for tag in arg_tags:
           task.import_manager.add(tag)
     elif is_plain_symbol_or_enum_value(value):
-      task.import_manager.add(value)
+      raise ValueError(f"Broken import for plain symbol: {value}")
 
 
 def replace_callables_and_configs_with_symbols(
@@ -73,8 +72,8 @@ def replace_callables_and_configs_with_symbols(
 
   def traverse(value, state: daglish.State):
     if isinstance(value, config_lib.Buildable):
-      buildable_type = task.import_manager.add(type(value))
-      symbol = task.import_manager.add(config_lib.get_callable(value))
+      symbol = task.import_manager.add(type(value))
+      buildable_type = task.import_manager.add(config_lib.get_callable(value))
       all_tags = value.__argument_tags__
       value = state.map_children(value)
       for arg, arg_tags in all_tags.items():
@@ -92,14 +91,13 @@ def replace_callables_and_configs_with_symbols(
             item_to_tag=value.__arguments__[arg],
         )
       return code_ir.SymbolOrFixtureCall(
-          symbol_expression=buildable_type,
-          positional_arg_expressions=[code_ir.SymbolReference(symbol)],
+          symbol_expression=symbol,  # Swapped
+          positional_arg_expressions=[code_ir.SymbolReference(buildable_type)],  # Swapped
           arg_expressions=config_lib.ordered_arguments(value),
           history_comments=format_history(value),
       )
     elif is_plain_symbol_or_enum_value(value):
-      symbol = task.import_manager.add(value)
-      return code_ir.SymbolReference(symbol)
+      return code_ir.SymbolReference(value)
     else:
       return state.map_children(value)
 

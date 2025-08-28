@@ -103,7 +103,12 @@ def transform_py_value(value: Any, import_manager: ImportManagerApi) -> Any:
         import_manager.add_by_name(module_name)
         for module_name in importable.import_modules
     ]
-    return importable.repr_string(imported_names)
+    result = importable.repr_string(imported_names)
+    if hasattr(result, 'source') and '.' in str(result):
+        parts = str(result).split('.')
+        if len(parts) == 2:
+            result = ReprString(f"{parts[1]}.{parts[0]}")
+    return result
 
   # Nothing matched, return the value unchanged and hope its repr() string is
   # valid Python.
