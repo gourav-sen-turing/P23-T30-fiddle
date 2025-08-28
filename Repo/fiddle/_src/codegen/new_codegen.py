@@ -138,4 +138,5 @@ def new_codegen(
       include_history=include_history,
       debug_print=debug_print,
   )
-  return codegen_obj(config, sub_fixtures=None).code
+  # Fix: Pass sub_fixtures parameter instead of None
+  return codegen_obj(config, sub_fixtures=sub_fixtures).code
