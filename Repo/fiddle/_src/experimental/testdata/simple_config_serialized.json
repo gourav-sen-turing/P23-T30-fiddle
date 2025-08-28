@@ -1,0 +1,133 @@
+{
+    "root": {
+        "type": "ref",
+        "key": "identity_fn_1"
+    },
+    "objects": {
+        "tuple_1": {
+            "type": {
+                "type": "pyref",
+                "module": "builtins",
+                "name": "tuple"
+            },
+            "items": [
+                [
+                    "Index(index=0)",
+                    "arg"
+                ]
+            ],
+            "metadata": null
+        },
+        "dict_1": {
+            "type": {
+                "type": "pyref",
+                "module": "builtins",
+                "name": "dict"
+            },
+            "items": [],
+            "metadata": {
+                "type": {
+                    "type": "pyref",
+                    "module": "builtins",
+                    "name": "tuple"
+                },
+                "items": [],
+                "metadata": null
+            }
+        },
+        "dict_2": {
+            "type": {
+                "type": "pyref",
+                "module": "builtins",
+                "name": "dict"
+            },
+            "items": [],
+            "metadata": {
+                "type": {
+                    "type": "pyref",
+                    "module": "builtins",
+                    "name": "tuple"
+                },
+                "items": [],
+                "metadata": null
+            }
+        },
+        "buildable_traverser_metadata_1": {
+            "type": {
+                "type": "pyref",
+                "module": "fiddle._src.config",
+                "name": "BuildableTraverserMetadata"
+            },
+            "items": [
+                [
+                    "Attr(name='fn_or_cls')",
+                    {
+                        "type": "pyref",
+                        "module": "__main__",
+                        "name": "identity_fn"
+                    }
+                ],
+                [
+                    "Attr(name='argument_names')",
+                    {
+                        "type": "ref",
+                        "key": "tuple_1"
+                    }
+                ],
+                [
+                    "Attr(name='argument_tags')",
+                    {
+                        "type": "ref",
+                        "key": "dict_1"
+                    }
+                ],
+                [
+                    "Attr(name='argument_history')",
+                    {
+                        "type": "ref",
+                        "key": "dict_2"
+                    }
+                ]
+            ],
+            "metadata": {
+                "type": "pyref",
+                "module": "fiddle._src.config",
+                "name": "BuildableTraverserMetadata"
+            }
+        },
+        "identity_fn_1": {
+            "type": {
+                "type": "pyref",
+                "module": "fiddle._src.config",
+                "name": "Config"
+            },
+            "items": [
+                [
+                    "Attr(name='arg')",
+                    {
+                        "type": "leaf",
+                        "value": 3.14,
+                        "paths": [
+                            "<root>.arg"
+                        ]
+                    }
+                ]
+            ],
+            "metadata": {
+                "type": "ref",
+                "key": "buildable_traverser_metadata_1"
+            },
+            "paths": [
+                "<root>"
+            ]
+        }
+    },
+    "refcounts": {
+        "tuple_1": 1,
+        "dict_1": 1,
+        "dict_2": 1,
+        "buildable_traverser_metadata_1": 1,
+        "identity_fn_1": 1
+    },
+    "version": "0.0.1"
+}
